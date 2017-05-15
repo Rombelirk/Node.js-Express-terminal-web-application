@@ -4,9 +4,11 @@
 
 1) git clone https://github.com/Rombelirk/Node.js-Express-terminal-web-application.git
 
-2) npm install
+2) cd Node.js-Express-terminal-web-application
 
-3) npm start
+3) npm install
+
+4) npm start
 
 **!!!  Внимание  !!!**
 
