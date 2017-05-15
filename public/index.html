@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>
+      Server command line
+    </title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+  </head>
+  <body>
+
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active" id="history-link"><a href="#page1">History</a></li>
+            <li id="terminal-link"><a href="#page2">Command Window</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div id="page1" class="pages">
+      <div id='history'>
+      </div>
+    </div>
+
+
+    <div id="page2" class="pages">
+      <form class="forma" method="post">
+        <input id="commandWindow" type="text" name="commandWindow" placeholder="Введите команду" value="">
+        <input id="commentary" type="text" name="commentary" placeholder="Введите комментарий" value="">
+        <input type="submit" name="submitCommand" value="Ok">
+      </form>
+    </div>
+
+
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function(){
+
+              var render = function (data) {
+                  $("#history").empty();
+                  $.each(data, function (i, element) {
+                      var commandReport = document.createElement('div');
+                      var heading = document.createElement('div');
+                      heading.className = "panel-heading";
+                      var body = document.createElement('div');
+                      body.className = "panel-body";
+                      commandReport.appendChild(heading);
+                      commandReport.appendChild(body);
+                      heading.innerHTML = "<strong>Status:</strong> " + element.status + "</br><strong>Started:</strong> " + element.started + "</br><strong>Command:</strong> " + element.value + "</br><strong>Comment:</strong> " + element.comment + "</br><strong>Finished:</strong> " + element.finished;
+                      body.innerHTML = "<strong>Response:</strong> " + element.response;
+
+                      if (element.status === "success") {
+                          commandReport.className = "panel panel-success";
+                      } else if (element.status === "error") {
+                          commandReport.className = "panel panel-danger";
+                      } else {
+                          commandReport.className = "panel panel-info";
+                      }
+                      $("#history").append(commandReport);
+                  });
+              };
+
+
+              var history = [];
+
+        // Получаем массив команд с интервалом в 1 сек и ререндерим истрию команд, если он
+        // не совпадает с текущим
+
+        setInterval(function(){
+          $.ajax({url: "http://localhost:3000/history"}).done(function(data) {
+
+            var historyString = JSON.stringify(history);
+            var dataString = JSON.stringify(data);
+            if (historyString !== dataString) {
+              render(data);
+            }
+
+          });
+        }, 1000)
+
+        // Делаем роутинг SPA
+
+        window.location.hash = "";
+        $("#page2").hide();
+        $(window).on('hashchange', handleHashChanges);
+        function handleHashChanges() {
+            var pageName = (window.location.hash) ? window.location.hash : "#page1";
+            $(".pages").hide();
+            $(pageName).show();
+        };
+
+
+        // Вешаем событие на отправку формы
+
+        $('.forma').on('submit', function(e) {
+            e.preventDefault();
+            var val = $("#commandWindow").val();
+            var comment = $("#commentary").val();
+            if (val === "") {
+              alert("Пожалуйста, впишите команду на исполнение");
+              return;
+            }
+            $.post('http://localhost:3000', {
+              val: val,
+              comment: comment
+            }).then(function(data){
+              render(data)
+            });
+        });
+
+        // Смена класса active в меню
+
+        $("#history-link").click(function() {
+          $("#history-link").addClass("active");
+          $("#terminal-link").removeClass("active");
+        });
+
+        $("#terminal-link").click(function() {
+          $("#history-link").removeClass("active");
+          $("#terminal-link").addClass("active");
+        });
+
+    });
+
+    </script>
+  </body>
+</html>
