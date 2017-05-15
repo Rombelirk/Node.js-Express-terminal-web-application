@@ -6,7 +6,7 @@
 
 2) npm install
 
-3) node index.js
+3) npm start
 
 **!!!  Внимание  !!!**
 
