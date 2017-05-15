@@ -23,11 +23,6 @@ app.get('/history', function (req,res) {
 	res.send(history);
 });
 
-// app.get('/', function (req,res) {
-//
-// 	res.send('index');
-// });
-
 app.post('/', function (req,res) {
   var dateStart = new Date,
 
